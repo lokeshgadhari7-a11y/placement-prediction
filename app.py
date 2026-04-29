@@ -89,13 +89,27 @@ if st.button("Predict"):
     }
 
     best_model = max(scores, key=scores.get)
+    if best_value > intake:
+    st.warning("Prediction adjusted to match intake limit")
 
     if best_model == "Linear":
-        best_value = lr_pred
+        intake = input_data["Total"].values[0]
+        best_value = min(best_value, intake)
+        lr_pred = min(lr_pred, intake)
+        pr_pred = min(pr_pred, intake)
+        rf_pred = min(rf_pred, intake)
     elif best_model == "Polynomial":
-        best_value = pr_pred
+        intake = input_data["Total"].values[0]
+        best_value = min(best_value, intake)
+        lr_pred = min(lr_pred, intake)
+        pr_pred = min(pr_pred, intake)
+        rf_pred = min(rf_pred, intake)
     else:
-        best_value = rf_pred
+        intake = input_data["Total"].values[0]
+        best_value = min(best_value, intake)
+        lr_pred = min(lr_pred, intake)
+        pr_pred = min(pr_pred, intake)
+        rf_pred = min(rf_pred, intake)
 
     # ---------------- OUTPUT ----------------
     st.subheader("📊 Model Predictions")
