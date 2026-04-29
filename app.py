@@ -13,9 +13,9 @@ if st.button("Predict"):
     result = predict(year)
 
     st.subheader("📊 Individual Model Predictions")
-    st.write("Linear:", int(result["Linear"]))
-    st.write("Polynomial:", int(result["Polynomial"]))
-    st.write("Random Forest:", int(result["RandomForest"]))
+    st.write("Linear Model Prediction:", int(result["Linear"]))
+    st.write("Polynomial Model Prediction:", int(result["Polynomial"]))
+    st.write("Random Forest Model Prediction:", int(result["RandomForest"]))
 
     # Best model
     best_value, best_model, scores = predict_best(year)
