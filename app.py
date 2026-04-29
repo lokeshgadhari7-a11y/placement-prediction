@@ -75,42 +75,58 @@ if st.button("Predict"):
 
     input_data = pd.DataFrame([[year, 60]], columns=["Year", "Total"])
 
+    # Predictions
     lr_pred = lr.predict(input_data)[0]
     pr_pred = pr.predict(poly.transform(input_data))[0]
     rf_pred = rf.predict(input_data)[0]
     salary_pred = salary_model.predict(input_data)[0]
     status = clf.predict(input_data)[0]
 
-    # Scores
+    # Model Scores
     scores = {
         "Linear": r2_score(y, lr.predict(X)),
         "Polynomial": r2_score(y, pr.predict(X_poly)),
         "RandomForest": r2_score(y, rf.predict(X))
     }
 
+    # Select Best Model
     best_model = max(scores, key=scores.get)
-    if best_value > intake:
-    st.warning("Prediction adjusted to match intake limit")
 
     if best_model == "Linear":
-        intake = input_data["Total"].values[0]
-        best_value = min(best_value, intake)
-        lr_pred = min(lr_pred, intake)
-        pr_pred = min(pr_pred, intake)
-        rf_pred = min(rf_pred, intake)
+        best_value = lr_pred
     elif best_model == "Polynomial":
-        intake = input_data["Total"].values[0]
-        best_value = min(best_value, intake)
-        lr_pred = min(lr_pred, intake)
-        pr_pred = min(pr_pred, intake)
-        rf_pred = min(rf_pred, intake)
+        best_value = pr_pred
     else:
-        intake = input_data["Total"].values[0]
-        best_value = min(best_value, intake)
-        lr_pred = min(lr_pred, intake)
-        pr_pred = min(pr_pred, intake)
-        rf_pred = min(rf_pred, intake)
+        best_value = rf_pred
 
+    # ---------------- CONSTRAINT FIX ----------------
+    intake = input_data["Total"].values[0]
+
+    if best_value > intake:
+        st.warning("Prediction adjusted to match intake limit")
+
+    # Apply constraint to all predictions
+    lr_pred = min(lr_pred, intake)
+    pr_pred = min(pr_pred, intake)
+    rf_pred = min(rf_pred, intake)
+    best_value = min(best_value, intake)
+
+    # ---------------- OUTPUT ----------------
+    st.subheader("📊 Model Predictions")
+    st.write("Linear:", int(lr_pred))
+    st.write("Polynomial:", int(pr_pred))
+    st.write("Random Forest:", int(rf_pred))
+
+    st.subheader("🤖 Best Model Prediction")
+    st.success(f"Selected Model: {best_model}")
+    st.write("Predicted Students Placed:", int(best_value))
+
+    st.write("💰 Avg Salary:", round(salary_pred, 2))
+
+    if status:
+        st.success("High Placement Expected")
+    else:
+        st.warning("Moderate Placement Expected")
     # ---------------- OUTPUT ----------------
     st.subheader("📊 Model Predictions")
     st.write("Linear:", int(lr_pred))
