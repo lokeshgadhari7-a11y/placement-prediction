@@ -106,10 +106,10 @@ if st.button("Predict"):
         st.warning("Prediction adjusted to match intake limit")
 
     # Apply constraint to all predictions
-   lr_pred = max(0, min(lr_pred, intake))
-pr_pred = max(0, min(pr_pred, intake))
-rf_pred = max(0, min(rf_pred, intake))
-best_value = max(0, min(best_value, intake))
+    lr_pred = max(0, min(lr_pred, intake))
+    pr_pred = max(0, min(pr_pred, intake))
+    rf_pred = max(0, min(rf_pred, intake))
+    best_value = max(0, min(best_value, intake))
 
     # ---------------- OUTPUT ----------------
     st.subheader("📊 Model Predictions")
