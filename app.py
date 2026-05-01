@@ -1,6 +1,5 @@
 import streamlit as st
-import numpy as np
-import pickle
+from model import predict_best
 
 # -------------------------------
 # Page Config
@@ -11,36 +10,31 @@ st.set_page_config(page_title="Placement Prediction", layout="centered")
 # Title
 # -------------------------------
 st.title("🎯 Placement Prediction System")
-st.markdown("Predict your chances of getting placed based on academic performance.")
-
-# -------------------------------
-# Load Model
-# -------------------------------
-model = pickle.load(open("model.pkl", "rb"))
+st.markdown("Predict placement chances based on historical data")
 
 # -------------------------------
 # Input Section
 # -------------------------------
-st.subheader("📊 Enter Your Details")
+st.subheader("📊 Select Year")
 
-cgpa = st.slider("CGPA", 0.0, 10.0, 7.0)
-iq = st.slider("IQ Score", 0, 200, 100)
-profile_score = st.slider("Profile Score (Projects/Skills)", 0, 100, 50)
+year = st.slider("Select Academic Year", 2015, 2025, 2022)
 
 # -------------------------------
 # Prediction
 # -------------------------------
-if st.button("Predict Placement Chance"):
+if st.button("Predict Placement"):
 
-    input_data = np.array([[cgpa, iq, profile_score]])
-    prediction = model.predict(input_data)
+    value, best_model = predict_best(year)
 
     st.subheader("📌 Result")
 
-    if prediction[0] == 1:
-        st.success("✅ You have a HIGH chance of getting placed!")
+    if value > 0.75:
+        st.success("✅ High placement rate expected")
     else:
-        st.error("❌ You have a LOW chance of getting placed.")
+        st.error("❌ Lower placement rate expected")
+
+    st.info(f"🤖 Best Model Used: {best_model}")
+    st.write(f"📈 Predicted Placement Value: {round(value, 2)}")
 
 # -------------------------------
 # About Section
@@ -49,10 +43,9 @@ st.markdown("---")
 st.subheader("📖 About This Project")
 
 st.write("""
-- This project uses Machine Learning to predict placement chances.
-- Algorithms used: Linear Regression, Logistic Regression.
-- Built using Python, Scikit-learn, and Streamlit.
-- Developed as part of a data science learning project.
+- Uses Machine Learning models to predict placement trends
+- Models used: Linear, Polynomial, Random Forest
+- Built using Python, Scikit-learn, and Streamlit
 """)
 
 # -------------------------------
