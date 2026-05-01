@@ -38,18 +38,36 @@ if df["PlacedFlag"].nunique() < 2:
 clf = LogisticRegression()
 clf.fit(X, df["PlacedFlag"])
 
-# ---------------- BEST MODEL ----------------
-def predict_best(year):
-    data = pd.DataFrame([[year, 60]], columns=["Year", "Total"])
-
-    # choose best model based on accuracy
-    scores = {
+# ---------------- SCORES ----------------
+def get_scores():
+    return {
         "Linear": r2_score(y, lr.predict(X)),
         "Polynomial": r2_score(y, pr.predict(X_poly)),
         "RandomForest": r2_score(y, rf.predict(X))
     }
 
+# ---------------- BEST MODEL ----------------
+def best_model_name():
+    scores = get_scores()
     best = max(scores, key=scores.get)
+    return best, scores
+
+# ---------------- PREDICT ALL ----------------
+def predict(year):
+    data = pd.DataFrame([[year, 60]], columns=["Year", "Total"])
+
+    return {
+        "Linear": lr.predict(data)[0],
+        "Polynomial": pr.predict(poly.transform(data))[0],
+        "RandomForest": rf.predict(data)[0],
+        "Salary": salary_model.predict(data)[0],
+        "Status": clf.predict(data)[0]
+    }
+
+# ---------------- PREDICT BEST ----------------
+def predict_best(year):
+    data = pd.DataFrame([[year, 60]], columns=["Year", "Total"])
+    best, scores = best_model_name()
 
     if best == "Linear":
         value = lr.predict(data)[0]
@@ -58,4 +76,4 @@ def predict_best(year):
     else:
         value = rf.predict(data)[0]
 
-    return value, best
+    return value, best, scores
