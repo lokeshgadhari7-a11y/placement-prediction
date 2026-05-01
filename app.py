@@ -1,55 +1,65 @@
 import streamlit as st
-from model import predict_best
+import pandas as pd
+import matplotlib.pyplot as plt
+from model import predict, get_scores, predict_best
 
-# -------------------------------
-# Page Config
-# -------------------------------
-st.set_page_config(page_title="Placement Prediction", layout="centered")
+st.title("🎓 Placement Prediction System (Computer Dept)")
 
-# -------------------------------
-# Title
-# -------------------------------
-st.title("🎯 Placement Prediction System")
-st.markdown("Predict placement chances based on historical data")
+# Input
+year = st.number_input("Enter Year", min_value=2024, max_value=2035)
 
-# -------------------------------
-# Input Section
-# -------------------------------
-st.subheader("📊 Select Year")
+if st.button("Predict"):
 
-year = st.slider("Select Academic Year", 2015, 2025, 2022)
+    result = predict(year)
 
-# -------------------------------
-# Prediction
-# -------------------------------
-if st.button("Predict Placement"):
+    st.subheader("📊 Individual Model Predictions")
+    st.write("Linear:", int(result["Linear"]))
+    st.write("Polynomial:", int(result["Polynomial"]))
+    st.write("Random Forest:", int(result["RandomForest"]))
 
-    value, best_model = predict_best(year)
+    # Best model
+    best_value, best_model, scores = predict_best(year)
 
-    st.subheader("📌 Result")
+    st.subheader("🤖 Best Model Prediction")
+    st.success(f"Selected Model: {best_model}")
+    st.write("Predicted Students Placed:", int(best_value))
 
-    if value > 0.75:
-        st.success("✅ High placement rate expected")
+    st.write("💰 Avg Salary:", round(result["Salary"], 2))
+
+    if result["Status"]:
+        st.success("High Placement Expected")
     else:
-        st.error("❌ Lower placement rate expected")
+        st.warning("Moderate Placement Expected")
 
-    st.info(f"🤖 Best Model Used: {best_model}")
-    st.write(f"📈 Predicted Placement Value: {round(value, 2)}")
+# ---------------- MODEL COMPARISON ----------------
+st.subheader("📈 Model Comparison")
+scores = get_scores()
 
-# -------------------------------
-# About Section
-# -------------------------------
-st.markdown("---")
-st.subheader("📖 About This Project")
+st.write(scores)
 
-st.write("""
-- Uses Machine Learning models to predict placement trends
-- Models used: Linear, Polynomial, Random Forest
-- Built using Python, Scikit-learn, and Streamlit
-""")
+plt.figure()
+plt.bar(scores.keys(), scores.values())
+st.pyplot(plt)
 
-# -------------------------------
-# Footer
-# -------------------------------
-st.markdown("---")
-st.caption("Developed by Lokesh Gadhari 🚀")
+best_model = max(scores, key=scores.get)
+st.info(f"Best Model based on R² Score: {best_model}")
+
+# ---------------- DATA VISUALIZATION ----------------
+df = pd.read_csv("data.csv")
+df = df[df["Dept"] == "Computer"]
+
+# Placement graph
+st.subheader("📉 Placement Trend")
+plt.figure()
+plt.plot(df["Year"], df["Placed"], marker='o')
+plt.xlabel("Year")
+plt.ylabel("Students Placed")
+st.pyplot(plt)
+
+# Companies graph
+st.subheader("🏢 Companies Visited Trend")
+plt.figure()
+plt.plot(df["Year"], df["Companies"], marker='o')
+plt.xlabel("Year")
+plt.ylabel("Companies")
+st.pyplot(plt)
